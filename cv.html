@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raveesha Gupta – CV</title>
+<style>
+  body { margin: 0; background: #f4f4f4; font-family: Arial, sans-serif; }
+  .bar { text-align: center; padding: 12px; }
+  .bar a { color: #00274c; font-weight: bold; text-decoration: none; border: 1px solid #00274c; padding: 6px 14px; border-radius: 4px; }
+  #pages canvas { display: block; margin: 0 auto 12px; max-width: 100%; height: auto; box-shadow: 0 1px 4px rgba(0,0,0,.2); background: #fff; }
+  #msg { text-align: center; color: #555; padding: 20px; }
+</style>
+</head>
+<body>
+  <div class="bar"><a href="Gupta_CV.pdf" target="_blank" rel="noopener">Download CV (PDF)</a></div>
+  <div id="msg">Loading CV…</div>
+  <div id="pages"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    // Change this if your file has a different name. "?v=" + time makes sure the newest version loads.
+    var PDF_FILE = "Gupta_CV.pdf";
+
+    var msg = document.getElementById("msg");
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      var url = new URL(PDF_FILE, window.location.href).href + "?v=" + Date.now();
+      pdfjsLib.getDocument(url).promise.then(function (pdf) {
+        msg.style.display = "none";
+        var container = document.getElementById("pages");
+        var chain = Promise.resolve();
+        for (var i = 1; i <= pdf.numPages; i++) {
+          (function (n) {
+            chain = chain.then(function () {
+              return pdf.getPage(n).then(function (page) {
+                var scale = 2; // sharp on high-resolution screens
+                var viewport = page.getViewport({ scale: scale });
+                var canvas = document.createElement("canvas");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                canvas.style.width = (viewport.width / scale) + "px";
+                container.appendChild(canvas);
+                return page.render({ canvasContext: canvas.getContext("2d"), viewport: viewport }).promise;
+              });
+            });
+          })(i);
+        }
+      }).catch(function () {
+        msg.innerHTML = 'The CV could not be displayed here. <a href="' + PDF_FILE + '" target="_blank" rel="noopener">Open the PDF</a>.';
+      });
+    } catch (e) {
+      msg.innerHTML = 'The CV could not be displayed here. <a href="' + PDF_FILE + '" target="_blank" rel="noopener">Open the PDF</a>.';
+    }
+  </script>
+</body>
+</html>
